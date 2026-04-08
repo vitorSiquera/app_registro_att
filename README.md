@@ -1,6 +1,6 @@
-# App Registro de Pedidos
+# App Registro de Atividades Físicas
 
-Aplicativo Flutter para registro e exibição de pedidos, desenvolvido com lista dinâmica, formulário de cadastro e navegação entre telas.
+Aplicativo Flutter para registro e acompanhamento de atividades físicas, com lista dinâmica, formulário de cadastro e navegação entre telas.
 
 ## Pré-requisitos
 
@@ -66,27 +66,41 @@ lib/
 ├── components/
 │   └── editor.dart                    # Componente reutilizável de campo de texto
 ├── models/
-│   └── modelo_principal.dart          # Modelo de dados Pedido
+│   └── modelo_principal.dart          # Modelo de dados Atividade
 └── screens/
     └── funcionalidades/
         ├── lista.dart                 # Tela principal com lista dinâmica
-        └── formulario.dart            # Tela de cadastro/edição de pedido
+        └── formulario.dart            # Tela de cadastro/edição de atividade
 ```
+
+## Modelo de dados
+
+Cada atividade registrada contém:
+
+| Campo | Tipo | Exemplo |
+|---|---|---|
+| Nome | texto | "Corrida no parque" |
+| Tipo | seleção | Cardio, Musculação, Natação... |
+| Duração | minutos | 45 |
+| Calorias | kcal | 350 |
+| Intensidade | seleção | Leve, Moderada, Intensa |
+| Data | dd/mm/aaaa | 08/04/2026 |
 
 ## Funcionalidades
 
 | Funcionalidade | Descrição |
 |---|---|
-| Lista dinâmica | Exibe pedidos em cards com descrição, categoria, quantidade e valor |
-| Cadastrar pedido | Formulário com validação abre via `Navigator.push()` |
-| Editar pedido | Toca no ícone de edição para pré-preencher o formulário |
-| Remover pedido | Toca no ícone de lixeira para excluir o item da lista |
-| Atualização automática | A lista atualiza via `setState()` após retorno do formulário |
+| Lista dinâmica | Exibe atividades em cards com ícone por tipo e badge de intensidade |
+| Resumo no topo | Total de atividades, minutos e calorias acumulados |
+| Cadastrar atividade | Formulário com validação abre via `Navigator.push()` |
+| Editar atividade | Ícone de edição pré-preenche o formulário com os dados existentes |
+| Remover atividade | Ícone de lixeira exclui o item da lista |
+| Atualização automática | Lista atualiza via `setState()` ao retornar do formulário |
 
 ## Tema
 
-O app utiliza **Material 3** (`useMaterial3: true`) com paleta roxa (`Colors.deepPurple`). Para alterar a cor, edite o `seedColor` em `lib/main.dart`:
+O app utiliza **Material 3** (`useMaterial3: true`) com paleta laranja (`Colors.orange`). Para alterar a cor, edite o `seedColor` em `lib/main.dart`:
 
 ```dart
-colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
 ```
