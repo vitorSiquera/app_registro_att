@@ -11,13 +11,13 @@ class AppRegistroAtt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Registro de Pedidos',
+      title: 'Registro de Atividades',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.deepPurple.shade700,
+          backgroundColor: Colors.orange.shade800,
           foregroundColor: Colors.white,
           titleTextStyle: const TextStyle(
             fontSize: 20,
@@ -28,21 +28,21 @@ class AppRegistroAtt extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple.shade600,
+            backgroundColor: Colors.orange.shade700,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: Colors.deepPurple.shade600,
+          backgroundColor: Colors.orange.shade700,
           foregroundColor: Colors.white,
         ),
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),
         ),
       ),
-      home: const ListaPedidos(),
+      home: const ListaAtividades(),
     );
   }
 }
