@@ -11,7 +11,6 @@ Integrante 2 : Pablo Miguel Sousa Nóbrega
 Integrante 3 : Vitor Siqueira Simeão
 ```
 
-> Se o repositório for privado, adicione o professor: `@adrianoprof`
 
 ---
 
