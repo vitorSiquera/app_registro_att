@@ -73,6 +73,7 @@ class _FormularioAtividadeState extends State<FormularioAtividade> {
     }
 
     final atividade = Atividade(
+      id: widget.atividadeParaEditar?.id,
       nome: nome,
       tipo: _tipoSelecionado,
       duracaoMinutos: duracao,

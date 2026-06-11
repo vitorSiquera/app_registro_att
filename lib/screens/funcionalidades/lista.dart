@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/modelo_principal.dart';
+import '../../repository/atividade_repository.dart';
 import 'formulario.dart';
 
 class ListaAtividades extends StatefulWidget {
@@ -10,39 +12,115 @@ class ListaAtividades extends StatefulWidget {
 }
 
 class _ListaAtividadesState extends State<ListaAtividades> {
-  final List<Atividade> _atividades = [];
+  final AtividadeRepository _repository = AtividadeRepository();
+  List<Atividade> _atividades = [];
+  bool _carregando = true;
 
-  int get _totalCalorias => _atividades.fold(0, (soma, a) => soma + a.calorias);
-  int get _totalMinutos => _atividades.fold(0, (soma, a) => soma + a.duracaoMinutos);
+  int get _totalCalorias =>
+      _atividades.fold(0, (soma, a) => soma + a.calorias);
+  int get _totalMinutos =>
+      _atividades.fold(0, (soma, a) => soma + a.duracaoMinutos);
 
-  void _abrirFormulario({Atividade? atividadeParaEditar, int? indice}) async {
-    final resultado = await Navigator.push<Atividade>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FormularioAtividade(atividadeParaEditar: atividadeParaEditar),
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _carregarAtividades();
+  }
 
-    if (resultado != null) {
+  Future<void> _carregarAtividades() async {
+    setState(() => _carregando = true);
+    try {
+      final atividades = await _repository.listar();
+      if (!mounted) return;
       setState(() {
-        if (indice != null) {
-          _atividades[indice] = resultado;
-        } else {
-          _atividades.add(resultado);
-        }
+        _atividades = atividades;
+        _carregando = false;
       });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregando = false);
+      _mostrarMensagem('Erro ao carregar atividades: $e', sucesso: false);
     }
   }
 
-  void _removerAtividade(int indice) {
-    setState(() => _atividades.removeAt(indice));
+  void _mostrarMensagem(String mensagem, {required bool sucesso}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: sucesso ? Colors.green.shade700 : Colors.red.shade700,
+      ),
+    );
+  }
+
+  void _alterarFonteDados(FonteDados novaFonte) {
+    if (_repository.fonteDados == novaFonte) return;
+    setState(() => _repository.fonteDados = novaFonte);
+    _carregarAtividades();
+  }
+
+  Future<void> _abrirFormulario({Atividade? atividadeParaEditar}) async {
+    final resultado = await Navigator.push<Atividade>(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            FormularioAtividade(atividadeParaEditar: atividadeParaEditar),
+      ),
+    );
+
+    if (resultado == null) return;
+
+    try {
+      await _repository.salvar(resultado);
+      await _carregarAtividades();
+      _mostrarMensagem(
+        atividadeParaEditar == null
+            ? 'Atividade cadastrada com sucesso!'
+            : 'Atividade atualizada com sucesso!',
+        sucesso: true,
+      );
+    } catch (e) {
+      _mostrarMensagem('Erro ao salvar atividade: $e', sucesso: false);
+    }
+  }
+
+  Future<void> _removerAtividade(Atividade atividade) async {
+    if (atividade.id == null) return;
+
+    try {
+      await _repository.deletar(atividade.id!);
+      await _carregarAtividades();
+      _mostrarMensagem('Atividade removida com sucesso!', sucesso: true);
+    } catch (e) {
+      _mostrarMensagem('Erro ao remover atividade: $e', sucesso: false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final fonteLocal = _repository.fonteDados == FonteDados.local;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro de Atividades'),
+        actions: [
+          PopupMenuButton<FonteDados>(
+            icon: Icon(fonteLocal ? Icons.storage : Icons.cloud),
+            tooltip: 'Fonte de dados',
+            onSelected: _alterarFonteDados,
+            itemBuilder: (context) => [
+              CheckedPopupMenuItem(
+                value: FonteDados.local,
+                checked: fonteLocal,
+                child: const Text('SQLite (local)'),
+              ),
+              CheckedPopupMenuItem(
+                value: FonteDados.remota,
+                checked: !fonteLocal,
+                child: const Text('API (remota)'),
+              ),
+            ],
+          ),
+        ],
         bottom: _atividades.isEmpty
             ? null
             : PreferredSize(
@@ -50,33 +128,38 @@ class _ListaAtividadesState extends State<ListaAtividades> {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    '${_atividades.length} atividade(s) · $_totalMinutos min · $_totalCalorias kcal',
+                    '${_atividades.length} atividade(s) · $_totalMinutos min · $_totalCalorias kcal · ${fonteLocal ? 'Local' : 'Remota'}',
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ),
               ),
       ),
-      body: _atividades.isEmpty
-          ? const Center(
-              child: Text(
-                'Nenhuma atividade registrada.\nToque em + para adicionar.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-              ),
-            )
-          : ListView.builder(
-              itemCount: _atividades.length,
-              itemBuilder: (context, indice) {
-                return ItemAtividade(
-                  atividade: _atividades[indice],
-                  onEditar: () => _abrirFormulario(
-                    atividadeParaEditar: _atividades[indice],
-                    indice: indice,
+      body: _carregando
+          ? const Center(child: CircularProgressIndicator())
+          : _atividades.isEmpty
+              ? Center(
+                  child: Text(
+                    'Nenhuma atividade registrada.\nToque em + para adicionar.\nFonte: ${fonteLocal ? 'SQLite local' : 'API remota'}.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
                   ),
-                  onRemover: () => _removerAtividade(indice),
-                );
-              },
-            ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _carregarAtividades,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: _atividades.length,
+                    itemBuilder: (context, indice) {
+                      final atividade = _atividades[indice];
+                      return ItemAtividade(
+                        atividade: atividade,
+                        onEditar: () =>
+                            _abrirFormulario(atividadeParaEditar: atividade),
+                        onRemover: () => _removerAtividade(atividade),
+                      );
+                    },
+                  ),
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _abrirFormulario(),
         child: const Icon(Icons.add),
@@ -138,12 +221,15 @@ class ItemAtividade extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${atividade.tipo} · ${atividade.duracaoMinutos} min · ${atividade.calorias} kcal'),
+            Text(
+              '${atividade.tipo} · ${atividade.duracaoMinutos} min · ${atividade.calorias} kcal',
+            ),
             const SizedBox(height: 4),
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: corIntensidade.withAlpha(30),
                     borderRadius: BorderRadius.circular(12),
@@ -151,7 +237,11 @@ class ItemAtividade extends StatelessWidget {
                   ),
                   child: Text(
                     atividade.intensidade,
-                    style: TextStyle(fontSize: 11, color: corIntensidade, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: corIntensidade,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

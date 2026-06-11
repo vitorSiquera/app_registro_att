@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: app-registro-att-api
+    runtime: node
+    rootDir: api
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: app-registro-att-db
+          property: connectionString
+
+databases:
+  - name: app-registro-att-db
+    plan: free
+    databaseName: atividades
+    user: atividades_user
