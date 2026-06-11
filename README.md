@@ -88,7 +88,7 @@ app_registro_att/
 
 ## API — Rotas (Render)
 
-Base URL: `https://app-registro-att-api.onrender.com` *(substitua pela sua URL após deploy)*
+Base URL: `https://app-registro-att.onrender.com`
 
 | Método | Rota | Parâmetros |
 |---|---|---|
