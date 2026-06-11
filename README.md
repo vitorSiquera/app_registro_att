@@ -7,8 +7,8 @@ Aplicativo Flutter para registro e acompanhamento de atividades físicas, com pe
 ```
 Nome da temática do aplicativo: Registro de Atividades Físicas
 Integrante 1: Hugo de Castro Rodrigues
-Integrante 2 (se houver): Pablo Miguel Sousa Nóbrega
-Integrante 3 (se houver): Vitor Siqueira Simeão
+Integrante 2 : Pablo Miguel Sousa Nóbrega
+Integrante 3 : Vitor Siqueira Simeão
 ```
 
 > Se o repositório for privado, adicione o professor: `@adrianoprof`
